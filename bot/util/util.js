@@ -58,7 +58,10 @@ module.exports.handleAliases = function (array) {
       return
 
     const openedAlias = aliasMap.get(array[index].substring(0, 3).toLowerCase())
-    newArray.splice(index, 1, openedAlias[0], openedAlias[1])
+    if (openedAlias[1])
+      newArray.splice(index, 1, openedAlias[0], openedAlias[1])
+    else
+      newArray.splice(index, 1, openedAlias[0])
   }
 
   return newArray
