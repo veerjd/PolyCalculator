@@ -137,19 +137,19 @@ function combat(attacker, defender, solution) {
 
 module.exports.evaluate = function (bestSolution, newSolution) {
 
-  if (newSolution.defenderHP < bestSolution.defenderHP)
+  if (newSolution.defenderHP > bestSolution.defenderHP)
     return true
   else {
     if (newSolution.defenderHP === bestSolution.defenderHP) {
-      if (bestSolution.attackerCasualties > newSolution.attackerCasualties)
+      if (bestSolution.attackerCasualties < newSolution.attackerCasualties)
         return true
       else {
         if (bestSolution.attackerCasualties === newSolution.attackerCasualties) {
-          if (bestSolution.attackersHP < newSolution.attackersHP)
+          if (bestSolution.attackersHP > newSolution.attackersHP)
             return true
           else {
             if (bestSolution.attackersHP === newSolution.attackersHP) {
-              if (bestSolution.finalSequence.length > newSolution.finalSequence.length)
+              if (bestSolution.finalSequence.length < newSolution.finalSequence.length)
                 return true
               else
                 return false
