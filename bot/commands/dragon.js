@@ -6,10 +6,10 @@ module.exports = {
   description: 'calculate the outcome of a direct hit and splash from a Fire Dragon.',
   aliases: ['fd', 'dr'],
   shortUsage(prefix) {
-    return `\`${prefix}dr [15,] c wa 7, ri 5\`\n[dragon HP], direct hit, splashed unit, splashed unit\n[] means optional`
+    return `\`${prefix}dr [15,] wa 7, ri 5\`\n[dragon HP], direct hit, splashed unit, splashed unit\n[] means optional`
   },
   longUsage(prefix) {
-    return `\`${prefix}dragon [15,] c wa 7, ri 5\`\n[dragon HP], direct hit, splashed unit, splashed unit\n[] means optional`
+    return `\`${prefix}dragon [15,] wa 7, ri 5\`\n[dragon HP], direct hit, splashed unit, splashed unit\n[] means optional`
   },
   forceNoDelete: false,
   category: 'Advanced',
@@ -38,13 +38,13 @@ module.exports = {
     const dragonStr = `dr ${dragonHP}`
     const dragonArray = dragonStr.split(/ +/).filter(x => x != '')
     const dragon = units.getUnitFromArray(dragonArray, replyData, trashEmoji)
-    dragon.getOverride(dragonArray)
+    dragon.getOverride(dragonArray, replyData)
 
     // DIRECT HIT UNIT BUILDING
     const directStr = unitsArray.shift()
     const directArray = directStr.split(/ +/).filter(x => x != '')
     const direct = units.getUnitFromArray(directArray, replyData, trashEmoji)
-    direct.getOverride(directArray)
+    direct.getOverride(directArray, replyData)
 
     const splashed = []
     if (unitsArray.length > 0) {
@@ -53,7 +53,7 @@ module.exports = {
         const splashedStr = unitsArray.shift()
         const splashedBits = splashedStr.split(/ +/).filter(x => x != '')
         const defender = units.getUnitFromArray(splashedBits, replyData, trashEmoji)
-        defender.getOverride(splashedBits)
+        defender.getOverride(splashedBits, replyData)
         splashed.push(defender)
       }
     }
@@ -68,8 +68,8 @@ module.exports = {
     dbData.defender = splashed.length
     dbData.attacker_description = direct.description
 
-    if (replyData.fields.length > 0)
-      dbData.reply_fields = [replyData.fields[0].value.toString(), replyData.fields[1].value]
+    if (replyData.discord.fields.length > 0)
+      dbData.reply_fields = [replyData.discord.fields[0].value.toString(), replyData.discord.fields[1].value]
 
     return replyData
   }

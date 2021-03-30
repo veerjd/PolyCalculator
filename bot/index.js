@@ -88,7 +88,6 @@ bot.on('message', async message => {
 
   const trashEmoji = isNotBotChannel && !command.forceNoDelete
   const generalDelete = { timeout: 5000 }
-  const failDelete = { timeout: 15000 }
 
   // DATA FOR DATABASE
   const dbData = {
@@ -104,10 +103,28 @@ bot.on('message', async message => {
   const replyData = {
     content: [],
     deleteContent: false,
-    title: undefined,
-    description: undefined,
-    fields: [],
-    footer: undefined
+    discord: {
+      title: undefined,
+      description: undefined,
+      fields: [],
+      footer: undefined
+    },
+    outcome: {
+      attackers: [],
+      // {
+      //    name
+      //    beforehp: 0,
+      //    maxhp: 40,
+      //    hplost: 0,
+      //    hpdefender: 0
+      // }
+      defender: {
+        // name: '',
+        // currenthp: 0,
+        // maxhp: 40,
+        // hplost: 0,
+      }
+    }
   }
 
   if (argsStr.includes('help')) {
@@ -117,7 +134,6 @@ bot.on('message', async message => {
     return message.channel.send(helpEmbed)
       .then(x => {
         x.react('🗑️').then().catch(console.error)
-        message.delete().then().catch(console.error)
       }).catch(console.error)
   }
 
@@ -153,7 +169,7 @@ bot.on('message', async message => {
         warnings.delete({ timeout: 15000 })
     })
 
-    if (replyObj.description === undefined && replyObj.title === undefined && replyObj.fields.length === 0)
+    if (replyObj.discord.description === undefined && replyObj.discord.title === undefined && replyObj.discord.fields.length === 0)
       return
 
     const msg = buildEmbed(replyObj)
@@ -176,12 +192,7 @@ bot.on('message', async message => {
       errorChannel.send(`**${message.cleanContent}** by ${message.author} (@${message.author.tag})\n${error}\n${message.url}`)
 
     return message.channel.send(`${error}`)
-      .then(x => {
-        if (trashEmoji) {
-          x.delete(failDelete).then().catch(console.error)
-          message.delete(failDelete).then().catch(console.error)
-        }
-      }).catch(console.error)
+      .then().catch(console.error)
   }
 })
 

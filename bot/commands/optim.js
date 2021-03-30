@@ -41,9 +41,9 @@ module.exports = {
           const userPremium = await db.query(sql, values)
           if (userPremium.rows.length === 0) {
             logChannel.send(`${message.author} (${message.author.tag}) exceeded the max number of optim in **${message.guild.name}**, ${meee}\n${message.url}`)
-            replyData.title = 'You need to be a **premium member** to be allows to use `.optim` with more than **3 attackers**.'
-            replyData.description = `To become a premium member, you can DM the creator and pay any amount of \`$\`.\nYou can DM ${meee} (${meee.tag}) or wait for him to DM you the PayPal link!`
-            replyData.footer = 'The money is used to pay the monthly fee necessary to keep the 24/7 server on which the bot runs, rolling.'
+            replyData.discord.title = 'You need to be a **premium member** to be allows to use `.optim` with more than **3 attackers**.'
+            replyData.discord.description = `To become a premium member, you can DM the creator and pay any amount of \`$\`.\nYou can DM ${meee} (${meee.tag}) or wait for him to DM you the PayPal link!`
+            replyData.discord.footer = 'The money is used to pay the monthly fee necessary to keep the 24/7 server on which the bot runs, rolling.'
             return replyData
           }
         }
@@ -57,12 +57,12 @@ module.exports = {
       const attackers = []
 
       const defender = units.getUnitFromArray(defenderArray, replyData, trashEmoji)
-      defender.getOverride(defenderArray)
+      defender.getOverride(defenderArray, replyData)
 
       unitsArray.forEach(x => {
         const attackerArray = x.split(/ +/).filter(y => y != '')
         const attacker = units.getUnitFromArray(attackerArray, replyData, trashEmoji)
-        attacker.getOverride(attackerArray)
+        attacker.getOverride(attackerArray, replyData)
         if (attacker.att !== 0)
           attackers.push(attacker)
       })
@@ -74,8 +74,8 @@ module.exports = {
       dbData.attacker = attackers.length
       dbData.defender = defender.name
       dbData.defender_description = defender.description
-      if (replyData.fields.length > 1)
-        dbData.reply_fields = [replyData.fields[0].value.toString(), replyData.fields[1].value]
+      if (replyData.discord.fields.length > 1)
+        dbData.reply_fields = [replyData.discord.fields[0].value.toString(), replyData.discord.fields[1].value]
 
       return replyData
     } catch (error) {
