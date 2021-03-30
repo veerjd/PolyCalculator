@@ -1,17 +1,46 @@
 const { MessageEmbed, Collection } = require('discord.js')
 
+module.exports.attackerCalc = function (aforce, totaldam, attacker) {
+  const step1 = aforce * attacker.att
+  const step3 = step1 * 4.5
+  const step5 = step3 / totaldam
+  // const step6 = Math.round(step5 * 10) / 10
+  const step7 = Math.round(step5 + 0.001)
+  return step7
+}
+
+module.exports.defenderCalc = function (aforce, totaldam, defender) {
+  const step1 = aforce * defender.def
+  const step3 = step1 * 4.5
+  const step5 = step3 / totaldam
+  const step7 = Math.round(step5)
+  return step7
+}
+
 module.exports.buildEmbed = function (data) {
   const embed = new MessageEmbed().setColor('#ff0066')
-  if (data.title)
-    embed.setTitle(data.title)
-  if (data.description)
-    embed.setDescription(data.description)
-  if (data.fields)
-    data.fields.forEach(el => {
-      embed.addField(el.name, el.value)
-    })
 
+  if (data.discord) {
+    if (data.discord.title)
+      embed.setTitle(data.discord.title)
+    if (data.discord.description)
+      embed.setDescription(data.discord.description)
+    if (data.discord.fields)
+      data.discord.fields.forEach(el => {
+        embed.addField(el.name, el.value)
+      })
+  }
   return embed
+}
+
+module.exports.poison = function (unit) {
+  unit.bonus = 0.8
+}
+
+module.exports.boost = function (unit) {
+  unit.name = `Boosted ${unit.name}`
+  unit.plural = `Boosted ${unit.plural}`
+  unit.att = unit.att + 0.5
 }
 
 module.exports.saveStats = function (data, db) {
@@ -28,8 +57,10 @@ module.exports.logUse = function (message, logChannel) {
     content = message.cleanContent
 
   const logData = {
-    title: `**${content}**`,
-    description: ` in **${message.guild.name.toUpperCase()}**\nin ${message.channel} (#${message.channel.name})\nby ${message.author} (${message.author.tag})\n${message.url}`
+    discord: {
+      title: `**${content}**`,
+      description: ` in **${message.guild.name.toUpperCase()}**\nin ${message.channel} (#${message.channel.name})\nby ${message.author} (${message.author.tag})\n${message.url}`
+    }
   }
   const newEmbed = module.exports.buildEmbed(logData)
   logChannel.send(newEmbed)

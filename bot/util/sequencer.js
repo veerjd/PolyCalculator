@@ -1,3 +1,6 @@
+const { poison } = require('./util')
+const { attackerCalc, defenderCalc } = require('./util')
+
 module.exports.generateArraySequences = function (length) {
   const array = []
   for (let i = 0; i < length; i++) {
@@ -54,8 +57,11 @@ module.exports.multicombat = function (attackers, defender, sequence) {
     hpLoss: [],
     hpDealt: [],
     sequence: sequence,
-    finalSequence: []
+    finalSequence: [],
+    wasPoisoned: false
   }
+
+  const initialBonus = defender.bonus
 
   for (const attacker of attackers) {
     const index = attackers.indexOf(attacker)
@@ -67,7 +73,14 @@ module.exports.multicombat = function (attackers, defender, sequence) {
 
     solution = combat(attacker, defender, solution)
     solution.finalSequence.push(sequence[index])
+
+    if (attacker.poisonattack || (attacker.poisonexplosion && attacker.exploding)) {
+      poison(defender)
+      solution.wasPoisoned = true
+    }
   }
+
+  defender.bonus = initialBonus
 
   return solution
 }
@@ -80,7 +93,7 @@ function doesNoDamage(attacker, defender, solution) {
     return true
 
   const totaldam = aforce + dforce;
-  const defdiff = Math.round(aforce / totaldam * attacker.att * 4.5);
+  const defdiff = attackerCalc(aforce, totaldam, attacker)
 
   if (defdiff < 1)
     return true
@@ -91,7 +104,7 @@ function combat(attacker, defender, solution) {
   const dforce = defender.def * solution.defenderHP / defender.maxhp * defender.bonus;
 
   const totaldam = aforce + dforce;
-  const defdiff = Math.round(aforce / totaldam * attacker.att * 4.5);
+  const defdiff = attackerCalc(aforce, totaldam, attacker)
 
   solution.hpDealt.push(defdiff)
   solution.defenderHP = solution.defenderHP - defdiff
@@ -105,8 +118,10 @@ function combat(attacker, defender, solution) {
     hpattacker = attacker.currenthp
   } else if (attacker.range === true && defender.range === false && attacker.forceRetaliation !== true) {
     hpattacker = attacker.currenthp
+  } else if (attacker.exploding || attacker.name === 'Segment') {
+    attdiff = attacker.currenthp
   } else {
-    attdiff = Math.round(dforce / totaldam * defender.def * 4.5)
+    attdiff = defenderCalc(dforce, totaldam, defender)
     attacker.attdiff = attdiff
     hpattacker = attacker.currenthp - attdiff;
     if (hpattacker <= 0) {
@@ -125,15 +140,6 @@ function combat(attacker, defender, solution) {
 
   return solution
 }
-
-// solution {
-//   defenderHP: 15,
-//   attackerCasualties: 0,
-//   attackersHP: 30,
-//   sequence: [1, 2, 3, 4],
-//   finalSequence: [1, 2, 3]
-//   hploss: [-3, -4, -5]
-// }
 
 module.exports.evaluate = function (bestSolution, newSolution) {
 
@@ -166,7 +172,8 @@ module.exports.simpleCombat = function (attacker, defender) {
   const dforce = defender.def * defender.currenthp / defender.maxhp * defender.bonus;
 
   const totaldam = aforce + dforce;
-  const defdiff = Math.round(aforce / totaldam * attacker.att * 4.5);
+  const defdiff = attackerCalc(aforce, totaldam, attacker)
+    ;
 
   let attdiff
 
@@ -177,10 +184,7 @@ module.exports.simpleCombat = function (attacker, defender) {
   } else if (attacker.range === true && defender.range === false && defender.forceRetaliation !== true) {
     attdiff = 0
   } else {
-    attdiff = Math.round(dforce / totaldam * defender.def * 4.5)
-
-    // if(attacker.currenthp - attdiff < 0)
-    //   attdiff = attacker.currenthp
+    attdiff = defenderCalc(dforce, totaldam, defender)
   }
 
   return {
